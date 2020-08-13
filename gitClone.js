@@ -32,9 +32,11 @@ class Git {
 	log() {
 		console.log("Log of all your changes!");
 		this.commitLogs.forEach((commit) => {
-			console.log(
-				`id:${commit.id} Branch: ${commit.parent.name} Commit: ${commit.message}`
-			);
+			if (this.HEAD.name === commit.parent.name) {
+				console.log(
+					`id:${commit.id} Branch: ${commit.parent.name} Commit: ${commit.message}`
+				);
+			}
 		});
 	}
 
@@ -52,7 +54,22 @@ class Git {
 			const newBranch = new Branch(branchName, null);
 			this.branchs.push(newBranch);
 			this.HEAD = newBranch;
+			console.log(`create branch: ${branchName}`);
 		}
+		return this;
+	}
+	merge(branchName) {
+		if (branchName === this.HEAD.name) {
+			console.log(`Cannot merge the same branch: ${branchName}`);
+			return this;
+		}
+		console.log("merging commence!");
+		this.commitLogs.forEach((commit) => {
+			if (commit.parent.name === branchName) {
+				this.commit(commit.message);
+				console.log(`merging changes commit: ${commit.message}`);
+			}
+		});
 		return this;
 	}
 }
@@ -63,5 +80,7 @@ git.commit("add express npm");
 git.checkout("auth");
 git.commit("add auth middleware");
 git.commit("create test for auth");
-
+git.merge("auth");
+git.checkout("Master");
+git.merge("auth");
 console.log(git);
